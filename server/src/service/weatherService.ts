@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import dayjs {type: dayjs} from 'dayjs';
+import dayjs, {type Dayjs} from 'dayjs';
 dotenv.config();
 
 // TODO: Define an interface for the Coordinates object
@@ -25,60 +25,50 @@ public iconDescription: string,
 }
 // TODO: Define a class for the Weather object
 class WeatherService {
-  private baseURL ?: string;
-  private apikey ?: string;
+  private baseURL?: string;
+  private apiKey?: string;
   private city = ""
 
 constructor() {
   this. baseURL = process. env.API_BASE_URL ||"";
-  this. apikey = process.env. API_KEY ||"";
+  this. apiKey = process.env. API_KEY ||"";
 }
 
 private async fetchLocationData(query: string) {
     try {
-     if (!this.baseURL || !this.apiKey) {
-       throw new Error("Invalid API configuration");
-     }
-      const response: Coordinates [] = await fetch(query).then((res) => res.json());
-      return response [0];
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-    privete async this.fetchLocationData(query: string) {
-      try {
-        if (!this.baseURL || !this.apiKey) {
-          throw new Error("Invalid API configuration");
-        }
-
-        const response: Coordinates[] = await fetch(query).then((res) => res.json());
-        return response[0];
-      } catch (error) {
-        console.log(error);
-        throw error;
+      if (!this.baseURL || !this.apiKey) {
+        throw new Error("Invalid API configuration");
       }
-    }
-    private destructureLocationData(locationData: Coordinates): Coordinates {
-      if (!locationData) {
-        throw new Error("Invalid location data");
-      }
-      const { name, lat, lon, country, state } = locationData;
 
-      const coordinates: Coordinates = {
-        name,
-        lat,
-        lon,
-        country,
-        state,
-      };
-      return coordinates;
-    }
+  const response: Coordinates[] = await fetch(query).then(res => res.json());
+    return response [0];
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+ private destructureLocationData(locationData: Coordinates): Coordinates {
+  if (!locationData) {
+    throw new Error("Invalid location data");
+  }
+  const { name, lat, lon, country, state } = locationData;
+
+  const coordinates: Coordinates = {
+    name,
+    lat,
+    lon,
+    country,
+    state,
+  };
+  return coordinates;
+}
+
     private buildGeocodeQuery(): string {
       const geocodeQuery = `${this.baseURL}/geo/1.0/direct?q=${this.city}&limit=1&appid=${this.apiKey}`;
       return geocodeQuery;
     }
     private buildWeatherQuery(coordinates: Coordinates): string {
-      const weatherQuery = `${this.baseURL}/data/2.5/forcast?lat=${coordinates.lat}&lon=${coordinates.lon}&units=imperial&appid${this.apiKey}`;
+      const weatherQuery = `${this.baseURL}/data/2.5/forcast?lat=${coordinates.lat}&lon=${coordinates.lon}&units=imperialappid${this.apiKey}`;
       return weatherQuery;
     }
     private async fetchAndDestructureLocationData() {
@@ -86,13 +76,12 @@ private async fetchLocationData(query: string) {
     }
     private async fetchWeatherData(coordinates: Coordinates) {
       try {
-        const response = await fetch(this.buildWeatherQuery(coordinates))
+        const response = await fetch(this.buildWeatherQuery(coordinates)).then((res) => res.json());
         if (!response.ok) {
           throw new Error("Weather data not found");
         }
-        const data = await response.json();
-        const currentWeather: Weather = this.parseCurrentWeather(date.list[0]);
-        const forcast: Weather[] = this.buildForecastArray(currentWeather, data.list);
+        const currentWeather: Weather = this.parseCurrentWeather(response.list[0]);
+        const forecast: Weather[] = this.buildForecastArray(currentWeather, response.list);
         return forecast;
 
       } catch (error) {
@@ -101,8 +90,8 @@ private async fetchLocationData(query: string) {
       }
     }
     private parseCurrentWeather(response: any) {
-      cosnt parseData = dayjs.unix(response.dt).format("MM/DD/YYYY");
-      cosnt currentWeather = new Weather(
+      const parseDate = dayjs.unix(response.dt).format("MM/DD/YYYY");
+      const currentWeather = new Weather(
         this.city,
         parseDate,
         response.main.temp,
@@ -136,12 +125,8 @@ private async fetchLocationData(query: string) {
         console.log(error);
         throw error;
       }
-    }
-    
-
-
+    }    
 }
-
 
 export default new WeatherService();
 
